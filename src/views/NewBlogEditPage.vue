@@ -11,7 +11,7 @@
             :src="newBlog.bannerPicture"
         />
         <v-card-title class="text-h5">
-          编辑新文章
+          <div class="text-h5">编辑您的新文章</div>
           <v-spacer/>
           <v-btn
               depressed
@@ -25,44 +25,107 @@
           </v-btn>
         </v-card-title>
         <v-card-subtitle>Edit and publish your new article</v-card-subtitle>
-        <v-row class="mx-2 mt-2">
-          <v-col cols="12">
-            <v-text-field
-                placeholder="文章标题"
-                outlined
-                dense
-                hide-details="auto"
-                prepend-inner-icon="mdi-file-edit-outline"
-                v-model="newBlog.title"
-            >
-            </v-text-field>
-          </v-col>
-        </v-row>
+        <div class="my-3">
+          <v-row class="mx-2">
+            <v-col cols="12" class="py-2">
+              <v-text-field
+                  placeholder="文章标题"
+                  outlined
+                  dense
+                  hide-details="auto"
+                  prepend-inner-icon="mdi-file-edit-outline"
+                  v-model="newBlog.title"
+              >
+              </v-text-field>
+            </v-col>
+          </v-row>
+          <v-row class="mx-2">
+            <v-col cols="8" class="py-2">
+              <v-text-field
+                  placeholder="副标题（可选）"
+                  outlined
+                  dense
+                  hide-details="auto"
+                  prepend-inner-icon="mdi-subtitles-outline"
+                  v-model="newBlog.subtitle"
+              >
+              </v-text-field>
+            </v-col>
+            <v-col cols="4" class="py-2">
+              <v-text-field
+                  placeholder="作者"
+                  outlined
+                  dense
+                  hide-details="auto"
+                  prepend-inner-icon="mdi-fountain-pen-tip"
+                  v-model="newBlog.author"
+              >
+              </v-text-field>
+            </v-col>
+          </v-row>
+          <v-row class="mx-2">
+            <v-col class="py-2">
+              <v-select
+                  v-model="tagsOfNewBlog"
+                  :items="existTags"
+                  prepend-inner-icon="mdi-tag-multiple-outline"
+                  chips
+                  clearable
+                  clear-icon="mdi-close"
+                  hide-details="auto"
+                  label="标签（至少一个）"
+                  multiple
+                  solo
+                  outlined
+                  flat
+                  dense
+              ></v-select>
+<!--              <v-combobox-->
+<!--                  v-model="tagsOfNewBlog"-->
+<!--                  :items="existTags"-->
+<!--                  chips-->
+<!--                  clearable-->
+<!--                  label="标签（至少一项）"-->
+<!--                  multiple-->
+<!--                  prepend-inner-icon="mdi-tag-multiple-outline"-->
+<!--                  solo-->
+<!--                  dense-->
+<!--                  outlined-->
+<!--                  flat-->
+<!--                  hide-details="auto"-->
+<!--              >-->
+<!--                <template v-slot:selection="{ attrs, item, select, selected }">-->
+<!--                  <v-chip-->
+<!--                      v-bind="attrs"-->
+<!--                      :input-value="selected"-->
+<!--                      close-->
+<!--                      small-->
+<!--                      @click="select"-->
+<!--                      @click:close="removeSingleTag(item)"-->
+<!--                  >-->
+<!--                    <strong>{{ item }}</strong>&nbsp;-->
+<!--                  </v-chip>-->
+<!--                </template>-->
+<!--              </v-combobox>-->
+            </v-col>
+          </v-row>
+          <v-row class="mx-2 mb-2">
+            <v-col class="py-2">
+              <v-text-field
+                  solo
+                  outlined
+                  flat
+                  name="input-7-4"
+                  prepend-inner-icon="mdi-file-outline"
+                  label="文章摘要"
+                  dense
+                  hide-details="auto"
+                  v-model="newBlog.digest"
+              ></v-text-field>
+            </v-col>
+          </v-row>
+        </div>
 
-        <v-row class="mx-2 my-2">
-          <v-col cols="8">
-            <v-text-field
-                placeholder="副标题（可选）"
-                outlined
-                dense
-                hide-details="auto"
-                prepend-inner-icon="mdi-subtitles-outline"
-                v-model="newBlog.subtitle"
-            >
-            </v-text-field>
-          </v-col>
-          <v-col cols="4">
-            <v-text-field
-                placeholder="作者"
-                outlined
-                dense
-                hide-details="auto"
-                prepend-inner-icon="mdi-fountain-pen-tip"
-                v-model="newBlog.author"
-            >
-            </v-text-field>
-          </v-col>
-        </v-row>
 
         <v-divider/>
         <v-row>
@@ -87,6 +150,17 @@
           </v-col>
         </v-row>
 
+        <v-divider/>
+
+        <v-row class="mx-2" justify="start">
+          <v-col cols="auto">
+            <v-checkbox label="开启赞赏" v-model="newBlog.appreciationOn"></v-checkbox>
+          </v-col>
+          <v-col cols="auto">
+            <v-checkbox label="允许评论" v-model="newBlog.commentOn"></v-checkbox>
+          </v-col>
+        </v-row>
+
         <v-row class="mx-1 my-2" justify="end">
           <v-col cols="auto">
             <v-btn
@@ -104,6 +178,7 @@
                 outlined
                 depressed
                 max-width="100"
+                @click="saveDraft"
             >
               保存草稿
             </v-btn>
@@ -118,6 +193,7 @@
             </v-btn>
           </v-col>
         </v-row>
+
       </v-card>
 
 
@@ -157,6 +233,9 @@ import axios from "axios";
 
 export default {
   name: "NewBlogEditPage",
+  mounted() {
+    this.getExistTags();
+  },
   methods: {
     cancelBannerUpload() {
       this.uploadBannerUrl = '';
@@ -168,8 +247,64 @@ export default {
       this.uploadBannerUrl = '';
       this.isDialogOpen = false;
     },
+    removeSingleTag (item) {
+      this.tagsOfNewBlog.splice(this.tagsOfNewBlog.indexOf(item), 1)
+      this.tagsOfNewBlog = [...this.tagsOfNewBlog]
+    },
+    getExistTags() {
+      axios({
+        url: 'http://localhost:9000/admin/tag/get_all_tag_names',
+        method: 'get'
+      }).then(resp => {
+        this.existTags = resp.data;
+      })
+    },
+    castTagStringArrayToObjectArray(tagStringArray) {
+      let tagObjectArray = new Array();
+      for (let tagStringKey in tagStringArray) {
+        tagObjectArray.push({
+          name: tagStringArray[tagStringKey]
+        })
+      }
+      return tagObjectArray;
+    },
+    saveArticle() {
+      axios({
+        url: 'http://localhost:9000/admin/blog/add_new_blog',
+        method: 'post',
+        data: this.newBlog
+      }).then(resp => {
+        console.log(resp);
+      })
+    },
+    saveDraft() {
+      this.newBlog.isPublished = false;
+      axios({
+        url: 'http://localhost:9000/admin/blog/add_new_blog',
+        method: 'post',
+        data: this.newBlog
+      }).then(resp => {
+        console.log(resp);
+      })
+    },
+    getDatetime() {
+      let dateObj = new Date();
+      let year = dateObj.getFullYear();
+      let month = dateObj.getMonth() + 1;
+      let day = dateObj.getDate();
+      let hour = dateObj.getHours();
+      let minute = dateObj.getMinutes();
+      let second = dateObj.getSeconds();
+      if (month < 10) month = '0' + month;
+      if (day < 10)  day = '0' + day;
+      let datetime = year + '-' + month + '-' + day + ' ' + hour + ":" + minute + ':' + second;
+      return datetime;
+    },
     saveAndPublish() {
+      this.newBlog.createTime = this.getDatetime();
       this.newBlog.isPublished = true;
+      this.newBlog.tags = this.castTagStringArrayToObjectArray(this.tagsOfNewBlog);
+      console.log(this.newBlog);
       axios({
         url: 'http://localhost:9000/admin/blog/add_new_blog',
         method: 'post',
@@ -184,13 +319,20 @@ export default {
       isDialogOpen: false,
       bannerHeight: 0,
       uploadBannerUrl: '',
+      existTags: [],
+      tagsOfNewBlog: [],
       newBlog: {
         bannerPicture: '',
         title: '',
         subtitle: '',
         author: '',
         content: '',
-        isPublished: false
+        isPublished: false,
+        appreciationOn: false,
+        commentOn: false,
+        createTime: '',
+        digest: '',
+        tags: []
       },
       toolbarsConfig: {
         bold: true, // 粗体

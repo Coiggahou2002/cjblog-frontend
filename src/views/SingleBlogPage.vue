@@ -2,7 +2,7 @@
   <div id="top-wrapper">
     <v-container>
       <v-card
-          class="mx-auto my-5"
+          class="mx-auto mt-5 mb-12"
           max-width="1000"
       >
         <v-img
@@ -37,6 +37,19 @@
             code-style="atom-one-light"
             :ishljs="true"
         />
+        <v-divider/>
+        <v-row class="mt-4 pb-4" justify="center">
+          <v-col cols="auto">
+            <v-btn color="error" v-if="blog.appreciationOn">
+              赞赏作者
+            </v-btn>
+          </v-col>
+          <v-col cols="auto">
+            <v-btn color="success">
+              分享到微信
+            </v-btn>
+          </v-col>
+        </v-row>
       </v-card>
     </v-container>
   </div>

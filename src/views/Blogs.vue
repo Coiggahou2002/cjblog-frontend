@@ -7,7 +7,7 @@
           <div v-for="(blog, index) in blogs" v-bind:key="index">
             <v-card
                 class="mx-auto ma-6 mb-13 blog-preview-card"
-                outlined
+                elevation="3"
             >
               <v-img
                   class="align-end"
@@ -111,11 +111,6 @@ export default {
       }).then(resp => {
         console.log(resp);
         this.blogs = resp.data;
-        // this.blog.title = resp.data.title;
-        // this.blog.digest = resp.data.digest;
-        // this.blog.createTime = resp.data.createTime;
-        // this.blog.bannerUrl = resp.data.bannerPicture;
-        // this.blog.tags = resp.data.tags;
       })
     },
     getTags() {
@@ -141,7 +136,7 @@ export default {
 #top-wrapper {
   background-color: rgb(250, 250, 250);
 }
-.blog-preview-card {
-  box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
-}
+/*.blog-preview-card {*/
+/*  box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;*/
+/*}*/
 </style>
